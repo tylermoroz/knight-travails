@@ -1,9 +1,6 @@
-#!/usr/bin/node
-
-class Graph {
+class KnightTravails {
   constructor() {
     this.adjList = new Map();
-    this.visited = new Set();
   }
 
   addVertex(vertex) {
@@ -24,7 +21,6 @@ class Graph {
     }
 
     this.adjList.get(key1).push(vertex2);
-    // this.adjList.get(key2).push(vertex1);
   }
 
   generatePossibleMoves(vertex) {
@@ -43,69 +39,46 @@ class Graph {
     return possibleMoves.filter(([newX, newY]) => this.isValidMove(newX, newY));
   }
 
-  buildPotentialKnightMoves(vertex) {
-    if (this.visited.has(vertex.toString())) {
-      return;
-    }
-
-    this.visited.add(vertex.toString());
-
-    const moves = this.generatePossibleMoves(vertex);
-    moves.forEach((move) => {
-      this.addEdge(vertex, move);
-      this.buildPotentialKnightMoves(move);
-    });
-  }
-
-  display() {
-    for (const [vertex, edges] of this.adjList) {
-      console.log(vertex, edges);
-    }
-  }
-
   isValidMove(x, y) {
     return x >= 0 && x < 8 && y >= 0 && y < 8;
   }
+
+  knightMoves(node, target) {
+    let visited = new Set();
+    let q = [];
+    let parentMap = new Map();
+
+    visited.add(node.toString());
+    q.push(node);
+    parentMap.set(node.toString(), null);
+
+    while (q.length !== 0) {
+      let current = q.shift();
+
+      if (current.toString() === target.toString()) {
+        return this.reconstructPath(parentMap, target);
+      }
+      const neighbors = this.generatePossibleMoves(current);
+
+      for (let neighbor of neighbors) {
+        if (!visited.has(neighbor.toString())) {
+          visited.add(neighbor.toString());
+          q.push(neighbor);
+          parentMap.set(neighbor.toString(), current);
+          this.addEdge(current, neighbor);
+        }
+      }
+    }
+    return null;
+  }
+
+  reconstructPath(parentMap, target) {
+    let path = [];
+    let current = target;
+    while (current !== null) {
+      path.push(current);
+      current = parentMap.get(current.toString());
+    }
+    return path.reverse();
+  }
 }
-
-const graph = new Graph();
-graph.addVertex([0, 0]);
-graph.buildPotentialKnightMoves([0, 0]);
-graph.display();
-
-// const createAdjacencyList = (x, y) => {
-//   const adjList = new Map();
-//   const directions = [
-//     [2, 1],
-//     [1, 2],
-//     [2, -1],
-//     [1, -2],
-//     [-1, -2],
-//     [-2, -1],
-//     [-2, 1],
-//     [-1, 2],
-//   ];
-//   adjList.set(["x", new Array()]);
-//   adjList.set(["y", new Array()]);
-
-//   for (const [dx, dy] of directions) {
-//     const nx = x + dx;
-//     const ny = y + dy;
-//     if (!adjList.has(nx)) {
-//       adjList.set(nx, new Array());
-//     }
-//     if (!adjList.has(ny)) {
-//       adjList.set(ny, new Array());
-//     }
-//     adjList.get(nx).push(ny);
-//   }
-//   return adjList;
-// };
-
-// // const knightMoves = (start, target) => {
-// //   //bfs
-// // };
-
-// const adjacencyList = createAdjacencyList(3, 3);
-
-// console.log(adjacencyList);
